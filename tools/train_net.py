@@ -25,6 +25,7 @@ import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
+from detectron2.data.datasets import register_coco_instances
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
 from detectron2.evaluation import (
     CityscapesInstanceEvaluator,
@@ -120,6 +121,12 @@ def setup(args):
     """
     Create configs and perform basic setups.
     """
+    register_coco_instances("visual_genome_train", {},
+                            "datasets/visual_genome/annotations/visual_genome_train.json",
+                            "datasets/visual_genome/train_image")
+    register_coco_instances("visual_genome_val", {},
+                            "datasets/visual_genome/annotations/visual_genome_val.json",
+                            "datasets/visual_genome/val_image")
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)

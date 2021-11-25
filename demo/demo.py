@@ -11,7 +11,9 @@ import cv2
 import tqdm
 
 from detectron2.config import get_cfg
+from detectron2.data.catalog import DatasetCatalog
 from detectron2.data.detection_utils import read_image
+from detectron2.data.datasets import register_coco_instances
 from detectron2.utils.logger import setup_logger
 
 from predictor import VisualizationDemo
@@ -21,6 +23,9 @@ WINDOW_NAME = "COCO detections"
 
 
 def setup_cfg(args):
+    register_coco_instances("visual_genome_val", {},
+                            "datasets/visual_genome/annotations/visual_genome_val.json",
+                            "datasets/visual_genome/val_image")
     # load config from file and command-line arguments
     cfg = get_cfg()
     # To use demo for Panoptic-DeepLab, please uncomment the following two lines.
@@ -29,6 +34,8 @@ def setup_cfg(args):
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     # Set score_threshold for builtin models
+    for c in cfg.DATASETS.TEST:
+        DatasetCatalog.get(c)
     cfg.MODEL.RETINANET.SCORE_THRESH_TEST = args.confidence_threshold
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.confidence_threshold
     cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = args.confidence_threshold
@@ -98,7 +105,6 @@ if __name__ == "__main__":
     logger.info("Arguments: " + str(args))
 
     cfg = setup_cfg(args)
-
     demo = VisualizationDemo(cfg)
 
     if args.input:
